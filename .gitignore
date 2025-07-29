@@ -1,0 +1,37 @@
+# Python 
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.log
+
+# Vitual environment
+venv/
+env/
+ENV/
+.venv/
+.idea/
+
+# Environment variables
+.env
+.env.*
+
+# Jupyter notebook checkpoint
+.ipynb_checkpoints
+
+# VSCode settings
+.settings/
+.vscode/
+
+# Streamlit configuration
+config.toml
+.streamlit/
+*.streamlit-logs
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+build/
