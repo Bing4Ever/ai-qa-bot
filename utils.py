@@ -1,9 +1,12 @@
 from openai import OpenAI
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def ask_openai(prompt, model="gpt-4.1", temperature=0.7, max_tokens=500):
+def ask_openai(message, model="gpt-3.5-turbo", temperature=0.7, max_tokens=500):
     """
     Function to ask OpenAI's API a question and return the response.
     
@@ -15,10 +18,6 @@ def ask_openai(prompt, model="gpt-4.1", temperature=0.7, max_tokens=500):
         str: The response from OpenAI's API.
     """
     try:
-        message = [{
-            "role": "user", 
-            "content": prompt,
-            }]
         response = client.chat.completions.create(
             model=model,
             messages=message,
@@ -28,3 +27,4 @@ def ask_openai(prompt, model="gpt-4.1", temperature=0.7, max_tokens=500):
         return response.choices[0].message.content.strip()
     except Exception as e:
         return f"An error occurred: {e}"
+        
