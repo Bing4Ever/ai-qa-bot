@@ -6,7 +6,7 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def ask_openai(message, model="gpt-3.5-turbo", temperature=0.7, max_tokens=500):
+def ask_openai(message, model="gpt-3.5-turbo", system_prompt="", temperature=0.7, max_tokens=500):
     """
     Function to ask OpenAI's API a question and return the response.
     
@@ -17,10 +17,12 @@ def ask_openai(message, model="gpt-3.5-turbo", temperature=0.7, max_tokens=500):
     Returns:
         str: The response from OpenAI's API.
     """
+    full_message = [{"role": "system", "content": system_prompt}] + message
+
     try:
         response = client.chat.completions.create(
             model=model,
-            messages=message,
+            messages=full_message,
             temperature=temperature,
             max_tokens=max_tokens
         )
