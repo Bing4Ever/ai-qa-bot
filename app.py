@@ -1,7 +1,11 @@
 import streamlit as st
+from pathlib import Path
 from utils import ask_openai
 from promp import ROLE_PROMPT
 from message import Message
+
+DATA_FILE = Path("data/user_log.json")
+MAX_QUESTIONS_PER_DAY = 5
 
 st.set_page_config(
     page_title="Chat with OpenAI", 
