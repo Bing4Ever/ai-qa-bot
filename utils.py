@@ -21,6 +21,9 @@ def ask_openai(message, model="gpt-3.5-turbo", system_prompt="", temperature=0.7
     """
     full_message = [{"role": "system", "content": system_prompt}] + message
 
+    return "This is a mock response"
+
+"""
     try:
         response = client.chat.completions.create(
             model=model,
@@ -31,7 +34,7 @@ def ask_openai(message, model="gpt-3.5-turbo", system_prompt="", temperature=0.7
         return response.choices[0].message.content.strip()
     except Exception as e:
         return f"An error occurred: {e}"
-        
+"""     
 
 def load_user_log(data_file):
     """
