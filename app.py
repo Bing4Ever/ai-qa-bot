@@ -1,4 +1,5 @@
 import streamlit as st
+import uuid
 from pathlib import Path
 from utils import ask_openai
 from promp import ROLE_PROMPT
@@ -10,17 +11,21 @@ def init_session_state():
         st.session_state.messages = []
     if "should_clear_input" not in st.session_state:
         st.session_state.should_clear_input = False
+    if "user_id" not in st.session_state:
+        st.session_state.user_id = str(uuid.uuid4())
+    
    
 DATA_FILE = Path("data/user_log.json")
 MAX_QUESTIONS_PER_DAY = 5
+init_session_state()
 
-user_id = "local_user"
+user_id = st.session_state.user_id
 user_log = load_user_log(DATA_FILE)
 can_ask = can_ask_today(user_id, user_log, MAX_QUESTIONS_PER_DAY)
 user_count = user_log.get(user_id, {}).get(get_today_key(), 0)
 remain = MAX_QUESTIONS_PER_DAY - user_count
 
-init_session_state()
+
 
 st.set_page_config(
     page_title="Chat with OpenAI", 
@@ -30,9 +35,13 @@ st.set_page_config(
 st.title("Chat with OpenAI")
 st.markdown("Welcome to the OpenAI Chatbot! Ask me anything and I'll do my best to provide a helpful response.")
 role = st.selectbox("Select Role", list(ROLE_PROMPT.keys()))
-system_prompt = ROLE_PROMPT[role]
+default_prompt = ROLE_PROMPT[role]
+
+if "system_prompt" not in st.session_state:
+    st.session_state.system_prompt = default_prompt
 
 st.markdown("----------------")
+st.caption(f"User ID: {user_id}")
 st.markdown("### Chat History")
 
 for msg in st.session_state.messages:
@@ -48,6 +57,12 @@ st.info(f"The question limit for today is {MAX_QUESTIONS_PER_DAY}. You have {rem
 
 if not can_ask:
     st.warning(f"You have reached the daily limit of {MAX_QUESTIONS_PER_DAY} questions. Please try again tomorrow.")
+
+with st.expander("System Prompt", expanded=False):
+    new_prompt = st.text_area("How would you like to set the system prompt?", value =st.session_state.system_prompt, height=100)
+    if new_prompt != st.session_state.system_prompt:
+        st.session_state.system_prompt = new_prompt
+        st.success("System prompt updated successfully!")
 
 question = st.text_input("Ask a question to OpenAI:", 
                          key="input_text", 
@@ -67,7 +82,7 @@ if submit and question.strip():
         }, role))
     
     with st.spinner("Getting response from OpenAI..."):
-        response = ask_openai(list(map(lambda p: p.message, st.session_state.messages)), system_prompt=system_prompt)
+        response = ask_openai(list(map(lambda p: p.message, st.session_state.messages)), system_prompt=st.session_state.system_prompt)
 
     st.write("Response from OpenAI:")
     st.markdown(response, unsafe_allow_html=False)
