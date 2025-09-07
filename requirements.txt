@@ -1,4 +1,5 @@
 openai
 streamlit
 streamlit-extras
+streamlit_cookies_controller
 python-dotenv

@@ -5,6 +5,7 @@ __pycache__/
 *.pyd
 *.pkl
 *.log
+*.db
 
 # Vitual environment
 venv/
@@ -35,3 +36,5 @@ config.toml
 # Windows
 Thumbs.db
 build/
+
+/uploads/

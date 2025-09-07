@@ -1,42 +1,39 @@
 import streamlit as st
-from db import get_user_chat_logs
+from db.invoice_records import get_invoice_records_by_user
+from dotenv import load_dotenv
+from utils.auth import get_user_id  # 你可以封装 cookie 或 session 中取 id
 
-st.title("📜 我的历史记录")
+load_dotenv()
+st.set_page_config(page_title="📜 Invoice History", page_icon="📜")
 
-# 初始化 user_id
-if "user_id" not in st.session_state:
+st.title("📜 Invoice History")
+
+user_id = get_user_id()
+if not user_id:
+    st.warning("You need to log in to view your invoice history.")
     st.stop()
 
-user_id = st.session_state.user_id
-
 # 分页参数
-PAGE_SIZE = 5
-if "history_page" not in st.session_state:
-    st.session_state.history_page = 0
+page_size = 5
+page = st.number_input("Page", min_value=1, step=1)
 
-# 获取数据
-logs = get_user_chat_logs(user_id, limit=PAGE_SIZE, offset=st.session_state.history_page * PAGE_SIZE)
+records, total_count = get_invoice_records_by_user(user_id, page, page_size)
 
-# 展示记录
-if logs:
-    for timestamp, role, question, answer in logs:
-        st.markdown(f"🕒 **{timestamp}** | 🎭 **{role}**")
-        st.markdown(f"**你：** {question}")
-        st.markdown(f"**AI：** {answer}")
-        st.markdown("---")
+if not records:
+    st.info("No invoice records found.")
 else:
-    st.info("No chat history available.")
+    for record in records:
+        id, file_name, image_path, invoice_date, issuer, total_amount, created_at = record
 
-# 分页按钮
-col1, col2, col3 = st.columns(3)
-with col1:
-    if st.button("⬅️ Previous") and st.session_state.history_page > 0:
-        st.session_state.history_page -= 1
-        st.rerun()
-with col2:
-    st.caption(f"Page：{st.session_state.history_page + 1}")
-with col3:
-    if len(logs) == PAGE_SIZE:
-        if st.button("➡️ Next"):
-            st.session_state.history_page += 1
-            st.rerun()
+        st.markdown(f"### 🧾 {file_name} ({created_at[:10]})")
+        st.image(image_path, width=250)
+
+        st.markdown(f"""
+        **🛍️ Issuer:** {issuer or 'N/A'}  
+        **📅 Date:** {invoice_date or 'N/A'}  
+        **💰 Total:** ${total_amount or 'N/A'}
+        """)
+        st.divider()
+
+    total_pages = (total_count + page_size - 1) // page_size
+    st.markdown(f"Page {page} of {total_pages}")
